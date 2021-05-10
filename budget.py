@@ -1,3 +1,5 @@
+import math
+
 class Category:
     def __init__(self, name):
         self.name = name
@@ -22,15 +24,6 @@ class Category:
 
         output = title + entries + total
         return output
-
-
-# *************Food*************
-# initial deposit        1000.00
-# groceries               -10.15
-# restaurant and more foo -15.89
-# Transfer to Clothing    -50.00
-# Total: 923.96
-
 
     def deposit(self, amount, description=""):
         self.ledger.append({"amount": float(amount), "description": description})
@@ -61,4 +54,44 @@ class Category:
 
 
 def create_spend_chart(categories):
-    pass
+    # Get total withdrawn from each category
+    total_withdrawals = []
+    for category in categories:
+        total = 0
+        for entry in category.ledger:
+            if int(entry["amount"]) < 0:
+                total += int(entry["amount"])
+            total_withdrawals.append(total)
+    # Get total_spend
+    total_spend = sum(total_withdrawals)
+    # Calculate each category as rounded % of total_spend
+    # percent_spends = []
+    # for item in total_withdrawals:
+
+    title = "Percentage spent by category"
+
+    # Build bars
+    # Loop over categories, if category == %, add o
+    upper_chart = ""
+    total = 100
+    while total > 0:
+        row = f"{total}|"
+        for category in total_withdrawals:
+            if round_down(category/total_spend) == total:
+                row = row + " o"
+                
+            
+    
+    # Print lines
+    # lines = "    -" + ("-" * (len(categories) * 3))
+
+    # Print category names
+    # Loop over categories
+    # 
+    return chart
+    
+def round_down(n, decimals=-1):
+    multiplier = 10 ** decimals
+    return int(math.floor(n * multiplier) / multiplier)
+
+print(round_down(55//60))
