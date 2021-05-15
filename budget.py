@@ -7,8 +7,10 @@ class Category:
 
     def __repr__(self):
         # Generate title
-        stars = '*'*((30 - len(self.name)) // 2)
-        title = f"{stars}{self.name}{stars}\n"
+        # stars = '*'*((30 - len(self.name)) // 2)
+        # title = f"{stars}{self.name}{stars}\n"
+
+        title = f"{self.name}".center(30,"*") + "\n" 
 
         # Generate entries
         entry_list = []
@@ -52,46 +54,87 @@ class Category:
             return False
         return True
 
+    def get_withdrawls(self):
+        total= 0
+        for item in self.ledger:
+            if item["amount"] < 0:
+                total += item["amount"]
+        return total
+
 
 def create_spend_chart(categories):
     # Get total withdrawn from each category
-    total_withdrawals = []
-    for category in categories:
-        total = 0
-        for entry in category.ledger:
-            if int(entry["amount"]) < 0:
-                total += int(entry["amount"])
-            total_withdrawals.append(total)
-    # Get total_spend
-    total_spend = sum(total_withdrawals)
+    # total_withdrawals = []
+    # for category in categories:
+    #     total = 0
+    #     for entry in category.ledger:
+    #         if int(entry["amount"]) < 0:
+    #             total += int(entry["amount"])
+    #         total_withdrawals.append(total)
+    # # Get total_spend
+    # total_spend = sum(total_withdrawals)
     # Calculate each category as rounded % of total_spend
     # percent_spends = []
     # for item in total_withdrawals:
 
-    title = "Percentage spent by category"
+    # Generate chart title
+    chart_title = "Percentage spent by category\n"
 
-    # Build bars
+    # Generate upper chart
     # Loop over categories, if category == %, add o
     upper_chart = ""
-    total = 100
-    while total > 0:
-        row = f"{total}|"
-        for category in total_withdrawals:
-            if round_down(category/total_spend) == total:
-                row = row + " o"
+    percentage = 100
+    totals = getTotals(categories)
+    while percentage >= 0:
+        category_bars = " "
+        for total in totals:
+            if total * 100 >= percentage:
+                category_bars += "o  "
+            else:
+                category_bars += "   "
+        upper_chart += str(percentage).rjust(3) + "|" + category_bars + "\n"
+        percentage -= 10
+        
                 
-            
-    
-    # Print lines
-    # lines = "    -" + ("-" * (len(categories) * 3))
+    # Generate lines
+    lines = "-" + "---"*len(categories)
+    lines = lines.rjust(len(lines)+4) + "\n"
 
-    # Print category names
-    # Loop over categories
-    # 
+    # Generate category names
+    names = []
+    x_axis = ""
+    for category in categories:
+        names.append(category.name)
+    
+    max_length = max(names, key=len)
+    
+    for x in range(len(max_length)):
+        name_str = "     "
+        for name in names:
+            if x >= len(name):
+                name_str += "   "
+            else:
+                name_str += name[x] + "  "
+
+        if (x != len(max_length) -1):
+            name_str += "\n"
+
+        x_axis += name_str
+
+
+    chart = chart_title + upper_chart + lines + x_axis
+    print(chart)
     return chart
-    
-def round_down(n, decimals=-1):
-    multiplier = 10 ** decimals
-    return int(math.floor(n * multiplier) / multiplier)
 
-print(round_down(55//60))
+def truncate(n):
+    multiplier = 10
+    return int(n + multiplier) / multiplier
+
+def getTotals(categories):
+    total = 0
+    breakdown = []
+    for category in categories:
+        total += category.get_withdrawls()
+        breakdown.append(category.get_withdrawls())
+    rounded = list(map(lambda x: truncate(x/total), breakdown))
+    return rounded
