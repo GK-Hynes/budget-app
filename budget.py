@@ -28,7 +28,7 @@ class Category:
         return output
 
     def deposit(self, amount, description=""):
-        self.ledger.append({"amount": float(amount), "description": description})
+        self.ledger.append({"amount": amount, "description": description})
 
     def withdraw(self, amount, description=""):
         if self.check_funds(amount):
@@ -63,19 +63,19 @@ class Category:
 
 
 def create_spend_chart(categories):
+    # Helper function for formatting totals
+    def truncate(n):
+        multiplier = 10
+        return int(n * multiplier) / multiplier
+
     # Get total withdrawn from each category
-    # total_withdrawals = []
-    # for category in categories:
-    #     total = 0
-    #     for entry in category.ledger:
-    #         if int(entry["amount"]) < 0:
-    #             total += int(entry["amount"])
-    #         total_withdrawals.append(total)
-    # # Get total_spend
-    # total_spend = sum(total_withdrawals)
-    # Calculate each category as rounded % of total_spend
-    # percent_spends = []
-    # for item in total_withdrawals:
+    total = 0
+    summary = []
+    for category in categories:
+        total += category.get_withdrawls()
+        summary.append(category.get_withdrawls())
+    totals = list(map(lambda x: truncate(x/total), summary))
+    
 
     # Generate chart title
     chart_title = "Percentage spent by category\n"
@@ -84,7 +84,6 @@ def create_spend_chart(categories):
     # Loop over categories, if category == %, add o
     upper_chart = ""
     percentage = 100
-    totals = getTotals(categories)
     while percentage >= 0:
         category_bars = " "
         for total in totals:
@@ -92,7 +91,7 @@ def create_spend_chart(categories):
                 category_bars += "o  "
             else:
                 category_bars += "   "
-        upper_chart += str(percentage).rjust(3) + "|" + category_bars + "\n"
+        upper_chart += str(percentage).rjust(3) + "|" + category_bars + ("\n")
         percentage -= 10
         
                 
@@ -102,7 +101,7 @@ def create_spend_chart(categories):
 
     # Generate category names
     names = []
-    x_axis = ""
+    cat_names = ""
     for category in categories:
         names.append(category.name)
     
@@ -119,22 +118,10 @@ def create_spend_chart(categories):
         if (x != len(max_length) -1):
             name_str += "\n"
 
-        x_axis += name_str
+        cat_names += name_str
 
-
-    chart = chart_title + upper_chart + lines + x_axis
+    chart = chart_title + upper_chart + lines + cat_names
     print(chart)
     return chart
 
-def truncate(n):
-    multiplier = 10
-    return int(n + multiplier) / multiplier
-
-def getTotals(categories):
-    total = 0
-    breakdown = []
-    for category in categories:
-        total += category.get_withdrawls()
-        breakdown.append(category.get_withdrawls())
-    rounded = list(map(lambda x: truncate(x/total), breakdown))
-    return rounded
+    
