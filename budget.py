@@ -7,9 +7,6 @@ class Category:
 
     def __repr__(self):
         # Generate title
-        # stars = '*'*((30 - len(self.name)) // 2)
-        # title = f"{stars}{self.name}{stars}\n"
-
         title = f"{self.name}".center(30,"*") + "\n" 
 
         # Generate entries
@@ -24,6 +21,7 @@ class Category:
         # Generate total
         total = f"Total: {self.get_balance()}"
 
+        # Now build table
         output = title + entries + total
         return output
 
@@ -54,7 +52,7 @@ class Category:
             return False
         return True
 
-    def get_withdrawls(self):
+    def get_withdrawals(self):
         total= 0
         for item in self.ledger:
             if item["amount"] < 0:
@@ -64,29 +62,28 @@ class Category:
 
 def create_spend_chart(categories):
     # Helper function for formatting totals
-    def truncate(n):
+    def round_down(n):
         multiplier = 10
         return int(n * multiplier) / multiplier
 
     # Get total withdrawn from each category
     total = 0
-    summary = []
+    withdrawals = []
     for category in categories:
-        total += category.get_withdrawls()
-        summary.append(category.get_withdrawls())
-    totals = list(map(lambda x: truncate(x/total), summary))
+        total += category.get_withdrawals()
+        withdrawals.append(category.get_withdrawals())
+    total_withdrawals = list(map(lambda x: round_down(x/total), withdrawals))
     
-
     # Generate chart title
     chart_title = "Percentage spent by category\n"
 
     # Generate upper chart
-    # Loop over categories, if category == %, add o
+    # Loop over categories, if category == percentage, add o
     upper_chart = ""
     percentage = 100
     while percentage >= 0:
         category_bars = " "
-        for total in totals:
+        for total in total_withdrawals:
             if total * 100 >= percentage:
                 category_bars += "o  "
             else:
@@ -94,14 +91,13 @@ def create_spend_chart(categories):
         upper_chart += str(percentage).rjust(3) + "|" + category_bars + ("\n")
         percentage -= 10
         
-                
     # Generate lines
     lines = "-" + "---"*len(categories)
     lines = lines.rjust(len(lines)+4) + "\n"
 
     # Generate category names
     names = []
-    cat_names = ""
+    category_names = ""
     for category in categories:
         names.append(category.name)
     
@@ -118,10 +114,8 @@ def create_spend_chart(categories):
         if (x != len(max_length) -1):
             name_str += "\n"
 
-        cat_names += name_str
+        category_names += name_str
 
-    chart = chart_title + upper_chart + lines + cat_names
-    print(chart)
+    # Put it all together
+    chart = chart_title + upper_chart + lines + category_names
     return chart
-
-    
